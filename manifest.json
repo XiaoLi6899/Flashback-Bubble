@@ -1,0 +1,13 @@
+{
+  "name": "闪回泡泡",
+  "short_name": "闪回泡泡",
+  "description": "闪回来临时，陪你一步步回到此刻",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#17131f",
+  "theme_color": "#17131f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
