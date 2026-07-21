@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#17131f">
+<title>闪回泡泡 · flashback bubble</title>
+<style>
+  :root{
+    --void:#17131f; --dusk:#241b33;
+    --lilac:#cbb6ec; --glow:#efe4ff; --rose:#e6b9cf;
+    --muted:#8877a6; --line:rgba(203,182,236,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    background:radial-gradient(120% 90% at 50% 0%, var(--dusk) 0%, var(--void) 62%);
+    color:var(--glow);min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+  .app{width:100%;max-width:460px;flex:1;display:flex;flex-direction:column;
+    padding:22px 26px calc(18px + env(safe-area-inset-bottom));min-height:100dvh}
+
+  .top{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:4px}
+  .wordmark{font-size:13px;letter-spacing:3px;color:var(--lilac);opacity:.85}
+  .wordmark small{display:block;font-size:9.5px;letter-spacing:2px;color:var(--muted);margin-top:3px;text-align:center}
+  .dots{display:flex;gap:9px;justify-content:center;min-height:16px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--line);transition:.5s}
+  .dot.on{background:var(--lilac);box-shadow:0 0 10px var(--lilac)}
+  .dot.done{background:rgba(203,182,236,.45)}
+
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px;padding:8px 0}
+  .screen{display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;width:100%;animation:rise .7s ease both}
+  .screen.show{display:flex}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .orb-wrap{height:186px;display:flex;align-items:center;justify-content:center}
+  .orb{width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, var(--glow), var(--lilac) 55%, #6d5a94 100%);
+    box-shadow:0 0 44px 6px rgba(203,182,236,.42), inset 0 0 30px rgba(255,255,255,.25);
+    transform:scale(.72)}
+  .orb.still{animation:still 7s ease-in-out infinite}
+  .orb.breathe{animation:breathe 10s ease-in-out infinite}
+  @keyframes still{0%,100%{transform:scale(.72);opacity:.9}50%{transform:scale(.8);opacity:1}}
+  @keyframes breathe{0%{transform:scale(.7)}40%{transform:scale(1.12)}55%{transform:scale(1.12)}100%{transform:scale(.7)}}
+
+  h1{font-size:29px;font-weight:600;line-height:1.4;letter-spacing:.5px}
+  .lead{font-size:17px;line-height:1.85;color:var(--lilac);max-width:19em;font-weight:400}
+  .soft{font-size:14.5px;line-height:1.8;color:var(--muted);max-width:20em}
+  .phase{font-size:26px;font-weight:500;letter-spacing:4px;color:var(--glow);min-height:34px}
+
+  .sense-num{font-size:64px;font-weight:300;color:var(--lilac);line-height:1;text-shadow:0 0 26px rgba(203,182,236,.4)}
+  .sense-text{font-size:22px;font-weight:500;line-height:1.5;max-width:15em}
+
+  .steps-list{display:flex;flex-direction:column;gap:16px;text-align:left;max-width:17em}
+  .steps-list li{list-style:none;font-size:18px;line-height:1.6;color:var(--glow);padding-left:26px;position:relative}
+  .steps-list li::before{content:"";position:absolute;left:2px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 10px var(--rose)}
+
+  .btns{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  button{font-family:inherit;cursor:pointer;border:none;font-size:17px;border-radius:100px;transition:.2s;width:100%}
+  .primary{background:linear-gradient(180deg,#d9c6f2,#b79ce4);color:#241033;font-weight:600;padding:17px;box-shadow:0 8px 26px -8px rgba(183,156,228,.6)}
+  .primary:active{transform:scale(.98)}
+  .ghost{background:transparent;color:var(--lilac);border:1px solid var(--line);padding:16px;font-weight:400}
+  .ghost:active{background:rgba(203,182,236,.06)}
+  .advance{background:rgba(203,182,236,.1);color:var(--glow);border:1px solid var(--line);padding:13px 30px;width:auto;font-size:16px}
+
+  .stat{font-size:15px;color:var(--muted)}
+  .stat b{color:var(--glow);font-weight:600;font-size:17px}
+
+  /* 结束语·古文落款 */
+  .closing{font-family:"Songti SC","Noto Serif SC",serif;font-size:20px;line-height:2.1;
+    color:var(--glow);letter-spacing:1px;max-width:16em;position:relative;padding-top:22px}
+  .closing::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:34px;height:1px;background:var(--line)}
+
+  .disclaimer{color:rgba(136,119,166,.7);font-size:12px;line-height:1.6;text-align:center;margin-top:8px;max-width:22em}
+  .brand{color:rgba(136,119,166,.9);font-size:12.5px;line-height:1.7;letter-spacing:1px}
+  .brand b{color:var(--lilac);font-weight:500}
+
+  .exit{padding-top:14px;text-align:center}
+  .exit a{color:var(--muted);font-size:13px;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+
+  @media (prefers-reduced-motion:reduce){.orb.breathe{animation-duration:10s}.screen{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="wordmark">闪回泡泡<small>FLASHBACK BUBBLE</small></div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+const STEPS=[{key:'breath',label:'呼吸'},{key:'ground',label:'接地'},{key:'stand',label:'站起来'},{key:'cold',label:'凉一下'}];
+let state='entry',stepIndex=-1,startTime=null,resolvedLabel=null,breatheTimer=null,senseIndex=0;
+const stage=document.getElementById('stage'),dotsEl=document.getElementById('dots');
+
+function renderDots(){
+  if(state==='entry'||state==='end'){dotsEl.innerHTML='';return;}
+  dotsEl.innerHTML=STEPS.map((s,i)=>{let c='dot';if(i<stepIndex)c+=' done';if(i===stepIndex)c+=' on';return `<span class="${c}"></span>`;}).join('');
+}
+function checkBtns(){
+  const last=stepIndex===STEPS.length-1?'还是很难熬':'还没有，继续下一步';
+  return `<div class="btns">
+    <button class="primary" onclick="feltBetter()">好一些了</button>
+    <button class="ghost" onclick="nextStep()">${last}</button></div>`;
+}
+function render(){
+  clearInterval(breatheTimer);renderDots();
+  if(state==='entry'){
+    stage.innerHTML=`<div class="screen show">
+      <div class="orb-wrap"><div class="orb still"></div></div>
+      <h1>你现在是安全的</h1>
+      <p class="lead">如果你正在经历闪回，我们一步一步来。<br>你不需要一次就全部好起来。</p>
+      <div class="btns"><button class="primary" onclick="begin()">开始</button></div>
+      <p class="disclaimer">这是一个陪你回到此刻的自助工具，不能替代专业诊断或治疗。</p>
+      <p class="brand"><b>李啸天</b> · 呼啸客栈</p>
+    </div>`;return;
+  }
+  if(state==='breath'){
+    stage.innerHTML=`<div class="screen show">
+      <div class="orb-wrap"><div class="orb breathe"></div></div>
+      <div class="phase" id="phase">慢慢吸气…</div>
+      <p class="soft">跟着这个泡泡。它变大时吸气，变小时呼气。<br>不用急，就这样呼吸几次。</p>
+      ${checkBtns()}</div>`;startBreath();return;
+  }
+  if(state==='ground'){
+    const s=[['5','说出你此刻<b>看得见</b>的 5 样东西'],['4','说出你<b>听得到</b>的 4 种声音'],['3','说出你能<b>摸到</b>的 3 样东西'],['2','说出你<b>闻得到</b>的 2 种气味'],['1','说出你能<b>尝到</b>的 1 种味道']];
+    const c=s[senseIndex];
+    stage.innerHTML=`<div class="screen show">
+      <p class="soft">把自己拉回此刻——慢慢找，不用说得完美。</p>
+      <div class="sense-num">${c[0]}</div>
+      <div class="sense-text">${c[1]}</div>
+      <div style="min-height:8px"></div>
+      <button class="advance" onclick="nextSense()">${senseIndex<4?'下一个':'完成了'}</button>
+      ${checkBtns()}</div>`;return;
+  }
+  if(state==='stand'){
+    stage.innerHTML=`<div class="screen show">
+      <h1 style="font-size:24px">站起来，回到这个房间</h1>
+      <ul class="steps-list">
+        <li>慢慢站起来</li>
+        <li>感受脚掌踩在地面上，稳稳地</li>
+        <li>环顾四周，看看你所在的地方</li>
+        <li>轻声告诉自己：我在哪里，今天是哪一年，我今年多大了</li></ul>
+      <p class="soft">那件事属于过去。此刻，你在这里，你是安全的。</p>
+      ${checkBtns()}</div>`;return;
+  }
+  if(state==='cold'){
+    stage.innerHTML=`<div class="screen show">
+      <h1 style="font-size:24px">一点凉意，把你带回来</h1>
+      <ul class="steps-list">
+        <li>去接一点凉水，轻轻拍在脸上，或手腕内侧</li>
+        <li>或者握住一件微凉的东西——一杯水、一把钥匙</li>
+        <li>感受那股凉，它在提醒你：你在此刻，你活着</li></ul>
+      <p class="soft">如果凉意让你更不舒服，跳过这一步完全没关系。</p>
+      ${checkBtns()}</div>`;return;
+  }
+  if(state==='end'){renderEnd();return;}
+}
+function startBreath(){
+  const cycle=10000,inhale=4000,t0=performance.now();
+  breatheTimer=setInterval(()=>{
+    const el=document.getElementById('phase');
+    if(!el){clearInterval(breatheTimer);return;}
+    const e=(performance.now()-t0)%cycle;
+    el.textContent=e<inhale?'慢慢吸气…':'慢慢呼气…';
+  },120);
+}
+function begin(){startTime=Date.now();stepIndex=0;state=STEPS[0].key;senseIndex=0;render();}
+function nextSense(){if(senseIndex<4){senseIndex++;render();}else{nextStep();}}
+function feltBetter(){resolvedLabel=STEPS[stepIndex].label;state='end';render();}
+function nextStep(){
+  if(stepIndex<STEPS.length-1){stepIndex++;senseIndex=0;state=STEPS[stepIndex].key;render();}
+  else{resolvedLabel=null;state='end';render();}
+}
+function restart(){state='entry';stepIndex=-1;startTime=null;resolvedLabel=null;senseIndex=0;render();}
+function renderEnd(){
+  const secs=Math.max(1,Math.round((Date.now()-startTime)/1000));
+  const m=Math.floor(secs/60),s=secs%60;
+  const dur=m>0?`${m} 分 ${s} 秒`:`${s} 秒`;
+  const msg=resolvedLabel?`这一次，是「${resolvedLabel}」帮你走了出来。记住它。`:`你走完了每一步——这需要很大的力气，你做到了。`;
+  stage.innerHTML=`<div class="screen show">
+    <div class="orb-wrap"><div class="orb still"></div></div>
+    <h1>你回来了</h1>
+    <p class="stat">这次，你用了 <b>${dur}</b> 把自己带了回来。</p>
+    <p class="lead">${msg}</p>
+    <p class="closing">从前种种，譬如昨日死；<br>往后种种，譬如今日生。</p>
+    <div class="btns"><button class="ghost" onclick="restart()">回到开始</button></div>
+    <p class="brand"><b>李啸天</b> · 呼啸客栈</p>
+  </div>`;
+}
+render();
+</script>
+</body>
+</html>
